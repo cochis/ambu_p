@@ -6,9 +6,8 @@ var now = moment().format('YYYY-MM-DD HH:mm:ss');
 class DatosEmpleadoController {
 
     public async list(req: Request, res: Response): Promise<void> {
-        console.log('entro a listar');
+
         const datos = await pool.query('SELECT * FROM datosEmpleado');
-        console.log(datos);
         res.json(datos);
     }
 
@@ -22,63 +21,58 @@ class DatosEmpleadoController {
     }
 
     public async create(req: Request, res: Response): Promise<void> {
-        const { clvEmpleado } = req.params;
-        const empleado = await pool.query('SELECT * FROM empleados WHERE clvEmpleado = ?', [clvEmpleado]);
-        if (empleado.length > 0) {
-            req.body.nombreCompleto = empleado[0]['nombre'] + ' ' + empleado[0]['apellidoPaterno'] + ' ' + empleado[0]['apellidoMaterno'];
-            req.body.clvEmpleado = empleado[0]['clvEmpleado'];
-            req.body.fechaCreacion = moment().format('YYYY-MM-DD HH:mm:ss');
-            req.body.fechaIngreso = moment().format('YYYY-MM-DD HH:mm:ss');
-            req.body.ultimaActualizacion = moment().format('YYYY-MM-DD HH:mm:ss');
-            req.body.activo = true;
-            const busquedaclv = await pool.query('SELECT * FROM datosEmpleado WHERE clvEmpleado = ?', [clvEmpleado]);; 
-            console.log(req.body);
-            if (busquedaclv.length > 0) {
-                return res.status(200).send({ error: 'Ya existe un empleado registrado. ' });
-            }
-            
-            const busquedarfc = await pool.query('SELECT * FROM datosEmpleado WHERE rfc = ?', [req.body.rfc]);; 
-            if( busquedarfc.length > 0 ){
-                return res.status(404).send({ error: 'Existe un empleado con el RFC identico.' });
-            }
-            
-            const busquedanss = await pool.query('SELECT * FROM datosEmpleado WHERE nss = ?', [req.body.nss]);; 
-            if( busquedanss.length > 0 ){
-                return res.status(404).send({ error: 'Existe un empleado con el NSS identico.' });
-            }
-            const busquedacurp = await pool.query('SELECT * FROM datosEmpleado WHERE curp = ?', [req.body.curp]);; 
-            if( busquedacurp.length > 0 ){
-                return res.status(404).send({ error: 'Existe un empleado con el CURP identico.' });
-            }
-            const result = await pool.query('INSERT INTO datosEmpleado  set ?', [req.body]);    
-                            if (!result) {
-                                return res.status(404).send({ error: 'No se pudo crear los datos de empleado .' });
-                            } else {
-                                res.json({ message: 'Nuevo empleado guardado' });
-                            }
-
-            
+        //SETEAMOS USUARIO PARA HACER LA BUSQUEDA POR USUARIO
+        req.body.fechaCreacion = moment().format('YYYY-MM-DD HH:mm:ss');
+        req.body.ultimaActualizacion = moment().format('YYYY-MM-DD HH:mm:ss');
+        if (req.body.clvEmpleado == null || 
+            req.body.nombreCompleto == null ||
+            req.body.fechaIngreso == null ||
+            req.body.clinicaImss == null ||
+            req.body.rfc == null ||
+            req.body.horario == null ||
+            req.body.curp == null ||
+            req.body.nss == null ||
+            req.body.telefonoCasa == null ||
+            req.body.telefonoMovil == null ||
+            req.body.tipoSangre == null ||
+            req.body.domicilio == null ||
+            req.body.estadoCivil == null ||
+            req.body.hijos == null ||
+            req.body.nombrePadre == null ||
+            req.body.nombreMadre == null ||
+            req.body.genero == null ||
+            req.body.sueldo == null) {
+            return res.status(204).send({ error: 'Envía los campos requeridos.' });
         }
-        res.status(404).json({ text: "El empleado no existe" });
-        console.log(req.body);
-        
-        
-        //SETEAMOS clvEmpleado PARA HACER LA BUSQUEDA POR CLAVE DE EMPLEADO
-        
-        console.log(req.body);
-        if (req.body.nombreCompleto == null) {
-            return res.status(500).send({ error: 'Envía los campos requeridos.' });
-        }
-        req.body.activo = true;
-        const result = await pool.query('INSERT INTO datosEmpleado set ?', [req.body]);
-        res.json({ message: 'Nuevo sitio guardado' });
-        // var datosEmpleado = await pool.query('SELECT * FROM datosEmpleados WHERE clvEmpleado = ?', [clvEmpleado]);
-        // if (datosEmpleado.length > 0) {
-        //     return res.status(200).send({ error: 'Ya existe un sitio con esa clave de sitio. ' });
-        // } else {
+        var clvEmpelado = req.body.clvEmpleado;
+        // req.body.hijos = undefined; 
+        // req.body.horario = undefined;
+        var datosEmpleado = await pool.query('SELECT * FROM datosEmpleado WHERE clvEmpleado = ?', [clvEmpelado]);
+        if (datosEmpleado.length > 0) {
+            return res.status(204).send({ error: 'Ya existe un los datos de ese usuario. ' });
+        } else {
 
-        //     const result = await pool.query('INSERT INTO datosEmpleados  set ?', [req.body]);
-        //     res.json({ message: 'Nuevo sitio guardado' });
+            var empleado = await pool.query('SELECT * FROM empleados WHERE clvEmpleado = ?', [clvEmpelado]);
+            empleado = empleado[0];
+            
+            if (empleado.length = 0) {
+                return res.status(204).send({ error: 'El empleado no existe ' });
+            }
+            else if (empleado.length = 1) {
+                const result = await pool.query('INSERT INTO datosEmpleado  set ?', [req.body]);
+                res.json({  datosEmpleado: result[0],
+                            message: 'Nuevo datos guardado' });
+                
+            } else {
+                return res.status(500).send({ error: 'El empleado no existe ' });
+            }
+        }
+        // const result = await pool.query('INSERT INTO datosEmpleado  set ?', [req.body]);
+        // res.json({ message: 'Nuevo datos guardado' });
+        // const result = await pool.query('INSERT INTO datosEmpleados  set ?', [req.body]);
+        // res.json({ message: 'Nuevo datos guardado' });
+        //         }
+        //     }
         // }
     }
     public async update(req: Request, res: Response): Promise<void> {

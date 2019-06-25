@@ -10,7 +10,6 @@ exports.ensureAuth  = function (req:any,res:any,next:any) {
     var token = req.headers.authorization.replace(/['"]+/g,'');
     try {
         var payload = jwt.decode(token, secret);
-
         if (payload.exp <= moment.unix()){
             return res.status(401).send({
                 error: 'El token ha expirado'

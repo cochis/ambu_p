@@ -1,4 +1,4 @@
-+import express, { Router } from 'express';
+import express, { Router } from 'express';
 
 import rolesController from '../controllers/rolesController';
 var md_auth = require('../middlewares/authenticated');

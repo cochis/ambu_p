@@ -22,8 +22,10 @@ class EmpleadosController {
                     empleado[0].password = undefined;
                     const loginEmpleado = await pool.query('SELECT * FROM loginEmpleados WHERE clvEmpleado = ? AND fechaClose IS NULL ORDER by idLogin DESC LIMIT 1', [empleado[0].clvEmpleado]);
                     if (loginEmpleado.length > 0) {
-                        return res.status(200).send({ error: 'LG0003' });
+                        return res.status(200).send({ error: 'LG0003',
+                                                        empleado: loginEmpleado[0] });
                     } else {
+                        empleado[0].password = undefined;
                         return res.json(empleado[0]);
                     }
                 } else {
@@ -41,32 +43,28 @@ class EmpleadosController {
 
     }
     public async restore(req: Request, res: Response): Promise<any> {
-
         const usuario = req.body.usuario;
         const password = req.body.password;
-
-
         if (usuario != undefined && password != undefined) {
             const empleado = await pool.query('SELECT * FROM empleados WHERE usuario = ?  ORDER by idEmpleado DESC LIMIT 1', [usuario]);
-
             if (empleado.length > 0) {
+                empleado[0].password = undefined;
+
                 var save = {
+
+                    
                     clvEmpleado: empleado[0].clvEmpleado,
                     fechaClose: moment().format('YYYY-MM-DD HH:mm:ss'),
-                    token: jwt.createToken(req.body)
+                    token: jwt.createToken(empleado[0])
                 };
-                const loginEmpleado = await pool.query('UPDATE loginEmpleados  set ? WHERE clvEmpleado = ? AND fechaClose IS NULL ORDER by idlogin DESC LIMIT 1 ', [save, empleado[0].clvEmpleado]);
-
+                const loginEmpleado = await pool.query('UPDATE loginEmpleados  set ? WHERE clvEmpleado = ?  ORDER by idlogin DESC LIMIT 1 ', [save, empleado[0].clvEmpleado]);
                 return res.json(empleado);
             } else {
                 return res.status(404).send({ error: 'LG0001' });
             }
-
         } else {
             return res.status(500).send({ error: ' Favor de enviar los datos completos' });
-
         }
-
     }
 
     public async obtenerToken(req: Request, res: Response): Promise<void> {
@@ -83,12 +81,9 @@ class EmpleadosController {
     public async list(req: Request, res: Response): Promise<void> {
 
         var empleados = await pool.query('SELECT * FROM empleados');
-        // console.log('entro empleados');
-        // console.log(req.body);
         // for (var i = 0; i < empleados.length; i++) {
         //     empleados[i]['password'] = undefined;
         // }
-        console.log(empleados);
         res.json(empleados);
     }
 
@@ -111,12 +106,9 @@ class EmpleadosController {
     }
 
     public async create(req: Request, res: Response): Promise<void> {
-console.log(req.body);
-
+        console.log(req.body);
         const usuario = req.body.usuario;
         const clvEmpleado = req.body.clvEmpleado;
-
-        console.log(req.body);
         req.body.fechaCreacion = moment().format('YYYY-MM-DD HH:mm:ss');
         req.body.ultimaActualizacion = moment().format('YYYY-MM-DD HH:mm:ss');
         if (req.body.nombre == null ||

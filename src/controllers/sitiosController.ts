@@ -46,7 +46,6 @@ class SitiosController {
         //SETEAMOS clvEmpleado PARA HACER LA BUSQUEDA POR CLAVE DE EMPLEADO
         req.body.fechaCreacion = now;
         req.body.activo = true;
-        console.log(req.body);
         if (req.body.nombre == null ||
             req.body.clvSitio == null ||
             req.body.clvLocalidad == null) {

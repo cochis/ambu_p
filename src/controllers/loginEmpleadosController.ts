@@ -30,7 +30,7 @@ class LoginEmpleadosController {
 
 
     public async create(req: Request, res: Response): Promise<void> {
-        req.body.fechaLogin =  moment().format('YYYY-MM-DD HH:mm:ss');;
+        req.body.fechaLogin =  moment().format('YYYY-MM-DD HH:mm:ss');
         var save = {
             clvEmpleado: req.body.clvEmpleado,
             fechaLogin:  moment().format('YYYY-MM-DD HH:mm:ss'),
@@ -45,19 +45,12 @@ class LoginEmpleadosController {
 
         const { clvEmpleado } = req.params;
         req.body.fechaLogin =  moment().format('YYYY-MM-DD HH:mm:ss');;
-        // console.log('entro a close');
-        // console.log(req.body);
-        // console.log(req.params);
-
-
         var save = {
             clvEmpleado: req.body.clvEmpleado,
             fechaClose:  moment().format('YYYY-MM-DD HH:mm:ss'),
             token: jwt.createToken(req.body)
         };
-        // console.log(save);
         const loginEmpleado = await pool.query('UPDATE loginEmpleados set ?  WHERE clvEmpleado = ? AND fechaClose IS NULL ORDER by idLogin DESC LIMIT 1 ', [save, clvEmpleado]);
-        // console.log(loginEmpleado);
         if (loginEmpleado.affectedRows <= 0) {
             res.json({ error: "No se pudo localizar el Sitio" });
         } else {

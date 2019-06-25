@@ -15,6 +15,7 @@ class RolesController {
         if (rol.length > 0) {
             return res.json(rol[0]);
         }
+
         res.status(404).json({ text: "El rol no existe" });
     }
 
@@ -52,7 +53,6 @@ class RolesController {
     }
     public async update(req: Request, res: Response): Promise<void> {
         const { clvRol } = req.params;
-        console.log(req.params);
         
         const oldRol = req.body;
         // req.body.nombre = cleanString(req.body.nombre);
